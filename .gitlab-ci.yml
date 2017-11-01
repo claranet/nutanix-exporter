@@ -1,0 +1,20 @@
+---
+
+image: docker:git
+
+stages:
+- build
+- release
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+  - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH .
+
+release:
+  stage: release
+  script:
+  - docker push $CI_REGISTRY/$CI_PROJECT_PATH
