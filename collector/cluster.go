@@ -158,11 +158,16 @@ var clusterUsageStats map[string]string = map[string]string {
 }
 
 type ClusterExporter struct {
+	NumNodes		*prometheus.GaugeVec
+
 	Stats		map[string]*prometheus.GaugeVec
 	UsageStats	map[string]*prometheus.GaugeVec
 }
 
 func (e *ClusterExporter) Describe(ch chan<- *prometheus.Desc) {
+	e.NumNodes = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: clusterNamespace, Name: "count_nodes", Help: "Number of nodes in cluster",}, clusterLabels, )
+	e.NumNodes.Describe(ch)
+
 	e.Stats = make(map[string]*prometheus.GaugeVec)
 	for k, h := range storageStats {
 		name := normalizeFQN(k)
