@@ -16,8 +16,8 @@ type StorageStat struct {
 }
 
 var (
-	namespace string = "nutanix"
-	labels	  []string = []string{"storage"}
+	storageNamespace string = "nutanix"
+	storageLabels	  []string = []string{"storage"}
 )
 
 var storageStats map[string]string = map[string]string {
@@ -162,14 +162,14 @@ func (e *StorageExporter) Describe(ch chan<- *prometheus.Desc) {
 	e.Stats = make(map[string]*prometheus.GaugeVec)
 	for k, h := range storageStats {
 		name := normalizeFQN(k)
-		e.Stats[k] = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: namespace, Name: name, Help: h,}, labels, )
+		e.Stats[k] = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: storageNamespace, Name: name, Help: h,}, storageLabels, )
 		e.Stats[k].Describe(ch)
 	}
 
 	e.UsageStats = make(map[string]*prometheus.GaugeVec)
 	for k, h := range storageUsageStats {
 		name := normalizeFQN(k)
-		e.UsageStats[k] = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: namespace, Name: name, Help: h,}, labels, )
+		e.UsageStats[k] = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: storageNamespace, Name: name, Help: h,}, storageLabels, )
 		e.UsageStats[k].Describe(ch)
 	}
 }
