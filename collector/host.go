@@ -118,11 +118,14 @@ var hostUsageStats map[string]string = map[string]string {
 }
 
 type HostExporter struct {
+	NumVms		*prometheus.GaugeVec
 	Stats		map[string]*prometheus.GaugeVec
 	UsageStats	map[string]*prometheus.GaugeVec
 }
 
 func (e *HostExporter) Describe(ch chan<- *prometheus.Desc) {
+	e.NumVms = prometheus.NewGaugeVec(prometheus.GaugeOpts{ Namespace: hostNamespace, Name: "count_vms", Help: "Count vms on each host",}, hostLabels, )
+
 	e.Stats = make(map[string]*prometheus.GaugeVec)
 	for k, h := range hostStats {
 		name := normalizeFQN(k)
@@ -141,6 +144,11 @@ func (e *HostExporter) Describe(ch chan<- *prometheus.Desc) {
 func (e *HostExporter) Collect(ch chan<- prometheus.Metric) {
 	hosts := nutanixApi.GetHosts()
 	for _, s := range hosts {
+		{
+			g := e.NumVms.WithLabelValues(s.Name)
+			g.Set(float64(s.NumVms))
+			g.Collect(ch)
+		}
 		for i, k := range e.UsageStats {
 			v, _ := strconv.ParseFloat(s.UsageStats[i], 64)
 			g := k.WithLabelValues(s.Name)
