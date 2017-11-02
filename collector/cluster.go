@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
-//	"github.com/prometheus/log"
+	"github.com/prometheus/log"
 )
 
 
@@ -185,6 +185,8 @@ func (e *ClusterExporter) Describe(ch chan<- *prometheus.Desc) {
 
 func (e *ClusterExporter) Collect(ch chan<- prometheus.Metric) {
 	cluster := nutanixApi.GetCluster()
+	log.Printf("%#v", cluster)
+
 	{
 		g := e.NumNodes.WithLabelValues(cluster.Name)
 		g.Set(float64(cluster.NumNodes))
@@ -197,7 +199,7 @@ func (e *ClusterExporter) Collect(ch chan<- prometheus.Metric) {
 		g.Collect(ch)
 	}
 	for i, k := range e.Stats {
-		v, _ := strconv.ParseFloat(cluster.UsageStats[i], 64)
+		v, _ := strconv.ParseFloat(cluster.Stats[i], 64)
 		g := k.WithLabelValues(cluster.Name)
 		g.Set(v)
 		g.Collect(ch)

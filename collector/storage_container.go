@@ -184,7 +184,7 @@ func (e *StorageExporter) Collect(ch chan<- prometheus.Metric) {
 			g.Collect(ch)
 		}
 		for i, k := range e.Stats {
-			v, _ := strconv.ParseFloat(s.UsageStats[i], 64)
+			v, _ := strconv.ParseFloat(s.Stats[i], 64)
 			g := k.WithLabelValues(s.Name)
 			g.Set(v)
 			g.Collect(ch)
