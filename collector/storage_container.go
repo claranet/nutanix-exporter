@@ -4,14 +4,11 @@ package collector
 //import "encoding/json"
 import (
 	"../nutanix"
-
 	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 //	"github.com/prometheus/log"
 )
-
-var nutanixApi *nutanix.Nutanix
 
 type StorageStat struct {
 	HelpText	string
@@ -199,3 +196,4 @@ func NewStorageExporter(api *nutanix.Nutanix) *StorageExporter {
 	nutanixApi = api
 	return &StorageExporter{}
 }
+
