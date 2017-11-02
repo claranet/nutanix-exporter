@@ -185,6 +185,11 @@ func (e *ClusterExporter) Describe(ch chan<- *prometheus.Desc) {
 
 func (e *ClusterExporter) Collect(ch chan<- prometheus.Metric) {
 	cluster := nutanixApi.GetCluster()
+	{
+		g := e.NumNodes.WithLabelValues(cluster.Name)
+		g.Set(float64(cluster.NumNodes))
+		g.Collect(ch)
+	}
 	for i, k := range e.UsageStats {
 		v, _ := strconv.ParseFloat(cluster.UsageStats[i], 64)
 		g := k.WithLabelValues(cluster.Name)
