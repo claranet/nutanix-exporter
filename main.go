@@ -44,6 +44,7 @@ func main() {
 
 	prometheus.MustRegister( collector.NewStorageExporter(nutanixApi) )
 	prometheus.MustRegister( collector.NewClusterExporter(nutanixApi) )
+	prometheus.MustRegister( collector.NewHostExporter(nutanixApi) )
 
 	http.Handle("/metrics", prometheus.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
