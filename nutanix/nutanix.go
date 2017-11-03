@@ -38,7 +38,7 @@ func (g *Nutanix) makeRequest(reqType string, action string) (*http.Response, er
 
 func (g *Nutanix) makeRequestWithParams(reqType string, action string, p RequestParams) (*http.Response, error)  {
 	_url := strings.Trim(g.url, "/")
-//	_url += "/PrismGateway/services/rest/v2.0/"
+	_url += "/PrismGateway/services/rest/v2.0/"
 	_url += strings.Trim(action, "/") + "/"
 
 	log.Printf("URL: %s", _url)
