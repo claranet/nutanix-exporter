@@ -16,7 +16,7 @@ type StorageStat struct {
 }
 
 var (
-	storageNamespace string = "nutanix"
+	storageNamespace string = "nutanix_storage_cluster"
 	storageLabels	  []string = []string{"storage"}
 )
 
