@@ -1,0 +1,27 @@
+language: go
+
+go:
+- master
+
+branches:
+  only:
+  - /^v\d+\.\d+\.\d+$/
+    
+before_install:
+  - go get github.com/mitchellh/gox
+ 
+script:
+#  - go build
+  - go get -d
+  - gox -os="linux darwin windows" -arch="amd64" -verbose -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
+  - ls -l bin/
+  
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: "$GITHUBTOKEN"
+  file_glob: true
+  file: bin/*
+  on:
+    tags: true

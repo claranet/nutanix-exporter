@@ -11,13 +11,10 @@
 package main
 
 import (
-	"./nutanix"
-	"./collector"
+	"github.com/claranet/nutanix-exporter/nutanix"
+	"github.com/claranet/nutanix-exporter/collector"
 	"flag"
 	"net/http"
-//	"time"
-//	"regexp"
-//	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/log"
