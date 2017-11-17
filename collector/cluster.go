@@ -3,7 +3,7 @@ package collector
 
 //import "encoding/json"
 import (
-	"../nutanix"
+	"github.com/claranet/nutanix-exporter(nutanix"
 
 	"strconv"
 
