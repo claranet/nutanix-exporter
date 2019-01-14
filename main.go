@@ -20,6 +20,7 @@ import (
 //	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/log"
 )
 
@@ -39,14 +40,24 @@ var (
 func main() {
 	flag.Parse()
 
-	log.Debug("Create Nutanix instance")
-	nutanixApi = nutanix.NewNutanix(*nutanixUrl, *nutanixUser, *nutanixPassword)
 
-	prometheus.MustRegister( collector.NewStorageExporter(nutanixApi) )
-	prometheus.MustRegister( collector.NewClusterExporter(nutanixApi) )
-	prometheus.MustRegister( collector.NewHostExporter(nutanixApi) )
+//	http.Handle("/metrics", prometheus.Handler())
+        http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		params := r.URL.Query()
+		section := params.Get("section")
+		log.Printf("Section: %s", section)
 
-	http.Handle("/metrics", prometheus.Handler())
+		log.Debug("Create Nutanix instance")
+
+		nutanixApi = nutanix.NewNutanix(*nutanixUrl, *nutanixUser, *nutanixPassword)
+		registry := prometheus.NewRegistry()
+		registry.MustRegister( collector.NewStorageExporter(nutanixApi) )
+		registry.MustRegister( collector.NewClusterExporter(nutanixApi) )
+		registry.MustRegister( collector.NewHostExporter(nutanixApi) )
+
+		h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
+		h.ServeHTTP(w, r)
+	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
 		<head><title>Nutanix Exporter</title></head>
