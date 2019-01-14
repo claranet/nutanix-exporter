@@ -13,7 +13,7 @@ before_install:
 script:
 #  - go build
   - go get -d
-  - gox -os="linux darwin windows" -arch="amd64" -verbose -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
+  - gox -os="linux" -arch="amd64" -verbose -output="bin/{{.Dir}}_{{.OS}}_{{.Arch}}"
   - ls -l bin/
   
 deploy:
