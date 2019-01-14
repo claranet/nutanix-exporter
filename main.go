@@ -1,4 +1,3 @@
-
 //
 // nutanix-exporter
 //
@@ -11,80 +10,98 @@
 package main
 
 import (
-	"./nutanix"
-	"./collector"
 	"flag"
 	"net/http"
-//	"time"
-//	"regexp"
-//	"strconv"
+
+	"./collector"
+	"./nutanix"
+
+	//	"time"
+	//	"regexp"
+	//	"strconv"
+	"fmt"
 	"io/ioutil"
-	yaml "gopkg.in/yaml.v2"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/log"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var (
-	namespace		= "nutanix"
-	nutanixUrl		= flag.String("nutanix.url", "", "Nutanix URL to connect to API https://nutanix.local.host:9440")
-	nutanixUser		= flag.String("nutanix.username", "", "Nutanix API User")
-	nutanixPassword	= flag.String("nutanix.password", "", "Nutanix API User Password")
-	listenAddress	= flag.String("listen-address", ":9405", "The address to lisiten on for HTTP requests.")
+	namespace       = "nutanix"
+	nutanixURL      = flag.String("nutanix.url", "", "Nutanix URL to connect to API https://nutanix.local.host:9440")
+	nutanixUser     = flag.String("nutanix.username", "", "Nutanix API User")
+	nutanixPassword = flag.String("nutanix.password", "", "Nutanix API User Password")
+	listenAddress   = flag.String("listen-address", ":9405", "The address to lisiten on for HTTP requests.")
 	nutanixConfig   = flag.String("nutanix.conf", "", "Which Nutanixconf.yml file should be used")
 )
 
-type Cluster struct {
+type cluster struct {
 	Host     string `yaml:"nutanix_host"`
 	Username string `yaml:"nutanix_user"`
 	Password string `yaml:"nutanix_password"`
 }
-var (
-	// Nutanix API
-	nutanixApi		*nutanix.Nutanix
-)
 
 func main() {
 	flag.Parse()
 
+	//Use locale configfile
+	var config map[string]cluster
+	var file []byte
+	var err error
 
-		//	http.Handle("/metrics", prometheus.Handler())
-        http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+	log.Infof("Config: %d", len(*nutanixConfig))
+	if len(*nutanixConfig) > 0 {
+		//Read complete Config
+		file, err = ioutil.ReadFile(*nutanixConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		file = []byte(fmt.Sprintf("default: {nutanix_host: %s, nutanix_user: %s, nutanix_password: %s}",
+			*nutanixURL, *nutanixUser, *nutanixPassword))
+	}
+	log.Debug(string(file))
+	err = yaml.Unmarshal(file, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//	http.Handle("/metrics", prometheus.Handler())
+	http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		section := params.Get("section")
-		log.Printf("Section: %s", section)
-		
+		if len(section) == 0 {
+			section = "default"
+		}
+
+		log.Infof("Queried section: %s", section)
 		log.Debug("Create Nutanix instance")
-		//---ANDY---
-		//Use locale configfile
-		var conf map[string]Cluster
-		//Read complete Config
-		file, e := ioutil.ReadFile(*nutanixConfig)
-		//fmt.Println("Eingelesene Configdatei\n", string(file))
-		if e!= nil {
-			log.Fatal(e)
-		}
-		e = yaml.Unmarshal(file, &conf)
-		if e!= nil {
-			log.Fatal(e)
-		}
-		
+
 		//Write new Parameters
-		*nutanixUrl = conf[section].Host
-		*nutanixUser = conf[section].Username
-		*nutanixPassword = conf[section].Password
-		log.Printf("Used Host:%s\nUsed username:%s\n",*nutanixUrl, *nutanixUser)
-		//---ANDY---
-		nutanixApi = nutanix.NewNutanix(*nutanixUrl, *nutanixUser, *nutanixPassword)
+		if conf, ok := config[section]; ok {
+			*nutanixURL = conf.Host
+			*nutanixUser = conf.Username
+			*nutanixPassword = conf.Password
+		} else {
+			log.Errorf("Section '%s' not found in config file", section)
+			return
+		}
+
+		log.Debugf("Used Host:%s\nUsed username:%s\n", *nutanixURL, *nutanixUser)
+
+		nutanixAPI := nutanix.NewNutanix(*nutanixURL, *nutanixUser, *nutanixPassword)
+
 		registry := prometheus.NewRegistry()
-		registry.MustRegister( collector.NewStorageExporter(nutanixApi) )
-		registry.MustRegister( collector.NewClusterExporter(nutanixApi) )
-		registry.MustRegister( collector.NewHostExporter(nutanixApi) )
+		registry.MustRegister(collector.NewStorageExporter(nutanixAPI))
+		registry.MustRegister(collector.NewClusterExporter(nutanixAPI))
+		registry.MustRegister(collector.NewHostExporter(nutanixAPI))
 
 		h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 		h.ServeHTTP(w, r)
 	})
-	
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
 		<head><title>Nutanix Exporter</title></head>
@@ -96,7 +113,7 @@ func main() {
 	})
 
 	log.Printf("Starting Server: %s", *listenAddress)
-	err := http.ListenAndServe(*listenAddress, nil)
+	err = http.ListenAndServe(*listenAddress, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
