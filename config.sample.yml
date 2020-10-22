@@ -1,0 +1,12 @@
+default:
+  nutanix_host: https://cluster.local:9440
+  nutanix_user: root
+  nutanix_password: p@ssw0rd
+cluster1:
+  nutanix_host: https://cluster1.local:9440
+  nutanix_user: root
+  nutanix_password: p@ssw0rd
+cluster2:
+  nutanix_host: https://cluster2.local:9440
+  nutanix_user: root
+  nutanix_password: p@ssw0rd

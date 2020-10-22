@@ -13,8 +13,7 @@ import (
 	"flag"
 	"net/http"
 
-	"github.com/claranet/nutanix-exporter/collector"
-	"github.com/claranet/nutanix-exporter/nutanix"
+	"nutanix"
 
 	//	"time"
 	//	"regexp"
@@ -38,10 +37,18 @@ var (
 )
 
 type cluster struct {
-	Host     string `yaml:"nutanix_host"`
-	Username string `yaml:"nutanix_user"`
-	Password string `yaml:"nutanix_password"`
+	Host     string          `yaml:"nutanix_host"`
+	Username string          `yaml:"nutanix_user"`
+	Password string          `yaml:"nutanix_password"`
+	Collect  map[string]bool `yaml:"collect"`
 }
+
+// type clusterCollect struct {
+// 	Vms               string `yaml:"vms"`
+// 	Cluster           string `yaml:"cluster"`
+// 	StorageContainers string `yaml:"storage_containers"`
+// 	Hosts             string `yaml:"hosts"`
+// }
 
 func main() {
 	flag.Parse()
@@ -51,7 +58,6 @@ func main() {
 	var file []byte
 	var err error
 
-	log.Infof("Config: %d", len(*nutanixConfig))
 	if len(*nutanixConfig) > 0 {
 		//Read complete Config
 		file, err = ioutil.ReadFile(*nutanixConfig)
@@ -62,11 +68,13 @@ func main() {
 		file = []byte(fmt.Sprintf("default: {nutanix_host: %s, nutanix_user: %s, nutanix_password: %s}",
 			*nutanixURL, *nutanixUser, *nutanixPassword))
 	}
-	log.Debug(string(file))
+
+	log.Debugf("Config File:\n%s\n", string(file))
 	err = yaml.Unmarshal(file, &config)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Debugf("Config: %v", config)
 
 	//	http.Handle("/metrics", prometheus.Handler())
 	http.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +84,7 @@ func main() {
 			section = "default"
 		}
 
-		log.Infof("Queried section: %s", section)
+		log.Infof("Section: %s", section)
 		log.Debug("Create Nutanix instance")
 
 		//Write new Parameters
@@ -89,14 +97,37 @@ func main() {
 			return
 		}
 
-		log.Debugf("Used Host:%s\nUsed username:%s\n", *nutanixURL, *nutanixUser)
+		log.Infof("Host: %s", *nutanixURL)
 
 		nutanixAPI := nutanix.NewNutanix(*nutanixURL, *nutanixUser, *nutanixPassword)
 
 		registry := prometheus.NewRegistry()
-		registry.MustRegister(collector.NewStorageExporter(nutanixAPI))
-		registry.MustRegister(collector.NewClusterExporter(nutanixAPI))
-		registry.MustRegister(collector.NewHostExporter(nutanixAPI))
+
+		checkCollect := func(c map[string]bool, f string) bool {
+			val, exist := c[f]
+			return !exist || (exist && val)
+		}
+
+		if checkCollect(config[section].Collect, "storage_containers") {
+			log.Debugf("Register StorageContainersCollector")
+			registry.MustRegister(nutanix.NewStorageContainersCollector(nutanixAPI))
+		}
+		if checkCollect(config[section].Collect, "hosts") {
+			log.Debugf("Register HostsCollector")
+			registry.MustRegister(nutanix.NewHostsCollector(nutanixAPI))
+		}
+		if checkCollect(config[section].Collect, "cluster") {
+			log.Debugf("Register ClusterCollector")
+			registry.MustRegister(nutanix.NewClusterCollector(nutanixAPI))
+		}
+		if checkCollect(config[section].Collect, "vms") {
+			log.Debugf("Register VmsCollector")
+			registry.MustRegister(nutanix.NewVmsCollector(nutanixAPI))
+		}
+		if checkCollect(config[section].Collect, "snapshots") {
+			log.Debugf("Register Snapshots")
+			registry.MustRegister(nutanix.NewSnapshotsCollector(nutanixAPI))
+		}
 
 		h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 		h.ServeHTTP(w, r)
@@ -112,7 +143,7 @@ func main() {
 		</html>`))
 	})
 
-	log.Printf("Starting Server: %s", *listenAddress)
+	log.Infof("Starting Server: %s", *listenAddress)
 	err = http.ListenAndServe(*listenAddress, nil)
 	if err != nil {
 		log.Fatal(err)

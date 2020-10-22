@@ -8,7 +8,7 @@ all: linux windows docker
 linux: prepare
 	$(eval GOOS=linux)
 	$(eval GOARCH=amd64)
-	go build -o ./bin/$(BIN_NAME)
+	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags -w -o ./bin/$(BIN_NAME)
 	zip ./bin/$(BIN_NAME)-$(GOOS)-$(GOARCH).zip ./bin/$(BIN_NAME)
 
 clean:
@@ -23,7 +23,7 @@ docker:
 windows: prepare
 	$(eval GOOS=windows)
 	$(eval GOARCH=amd64)
-	go build -o ./bin/$(BIN_NAME).exe
+	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags -w -o ./bin/$(BIN_NAME).exe
 	zip ./bin/$(BIN_NAME)-$(GOOS)-$(GOARCH).zip ./bin/$(BIN_NAME).exe
 prepare:
 	@echo "Create output directory ./bin/"
