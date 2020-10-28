@@ -35,5 +35,7 @@ jobs:
         uses: docker/build-push-action@v2.0.1
         with:
           push: true
-          tags: claranet/nutanix-exporter:${GITHUB_REF#refs/heads/}
+          tags: |
+            claranet/nutanix-exporter:latest
+            claranet/nutanix-exporter:v0.2.0
           
