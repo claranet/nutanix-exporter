@@ -1,14 +1,17 @@
 
 BIN_NAME = nutanix-exporter
 DOCKER_IMAGE_NAME ?= nutanix-exporter
-GOPATH = $($pwd)
+export GOPATH = ${PWD}
+export CGO_ENABLED = 0
+export GOBUILD_ARGS = -a -tags netgo -ldflags -w
+# export GOARCH ?= amd64
+# export GOOS ?= linux
 
 all: linux windows docker
 
 linux: prepare
-	$(eval GOOS=linux)
-	$(eval GOARCH=amd64)
-	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags -w -o ./bin/$(BIN_NAME)
+	$(eval export GOOS=linux)
+	go build $(GOBUILD_ARGS) -o ./bin/$(BIN_NAME)
 	zip ./bin/$(BIN_NAME)-$(GOOS)-$(GOARCH).zip ./bin/$(BIN_NAME)
 
 clean:
@@ -21,12 +24,13 @@ docker:
 	@docker build -t "$(DOCKER_IMAGE_NAME)" .
 
 windows: prepare
-	$(eval GOOS=windows)
-	$(eval GOARCH=amd64)
-	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags -w -o ./bin/$(BIN_NAME).exe
+	$(eval export GOOS=windows)
+	go build $(GOBUILD_ARGS) -o ./bin/$(BIN_NAME).exe
 	zip ./bin/$(BIN_NAME)-$(GOOS)-$(GOARCH).zip ./bin/$(BIN_NAME).exe
-prepare:
+
+prepare:	
 	@echo "Create output directory ./bin/"
+	go env
 	mkdir -p bin/
 	@echo "GO get dependencies"
 	go get -d

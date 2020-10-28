@@ -10,20 +10,17 @@
 package main
 
 import (
+	"./internal/nutanix"
+
 	"flag"
 	"net/http"
 
-	"nutanix"
-
-	//	"time"
-	//	"regexp"
-	//	"strconv"
 	"fmt"
 	"io/ioutil"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/log"
+	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
 

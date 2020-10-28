@@ -9,7 +9,7 @@ FROM golang:1.15 AS builder
 
 ENV GOPATH /go
 
-WORKDIR /go/src/github.com/claranet/nutanix-exporter
+WORKDIR /nutanix-exporter
 COPY . .
 RUN echo "> GOPATH: " $GOPATH
 RUN go get -d
@@ -21,7 +21,7 @@ FROM quay.io/prometheus/busybox:latest
 LABEL maintainer "Martin Weber <martin.weber@de.clara.net>"
 
 WORKDIR /
-COPY --from=builder /go/src/github.com/claranet/nutanix-exporter/nutanix-exporter /usr/local/bin/nutanix-exporter
+COPY --from=builder /nutanix-exporter/nutanix-exporter /usr/local/bin/nutanix-exporter
 RUN touch /config.yml
 
 EXPOSE 9404

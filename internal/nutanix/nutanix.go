@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/prometheus/log"
+	log "github.com/sirupsen/logrus"
 )
 
 type RequestParams struct {
