@@ -25,12 +25,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: test
-        run: echo $GITHUB_REF
+        run: echo $GITHUB_HEAD_REF
         
       # Runs a set of commands using the runners shell
-      - name: Build Image
-        uses: docker/build-push-action@v2.0.1
-        with:
-          push: true
-          tags: claranet/nutanix-exporter:dev
+#      - name: Build Image
+#        uses: docker/build-push-action@v2.0.1
+#        with:
+#          push: true
+#          tags: claranet/nutanix-exporter:dev
           
