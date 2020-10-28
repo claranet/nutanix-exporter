@@ -27,7 +27,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Runs a set of commands using the runners shell
       - name: Build Image
         uses: docker/build-push-action@v2.0.1
         with:
