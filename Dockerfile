@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags -w
 FROM quay.io/prometheus/busybox:latest
 
 LABEL description "Prometheus Exporter for Nutanix AHV Cluster" \
-      version "v0.3.0" \
+      version "v0.5.0" \
       maintainer "Martin Weber <martin.weber@de.clara.net>"
 
 WORKDIR /

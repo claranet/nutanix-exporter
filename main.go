@@ -3,7 +3,7 @@
 //
 // Prometheus Exportewr for Nutanix API
 //
-// Version: v0.3.0
+// Version: v0.5.0
 // Author: Martin Weber <martin.weber@de.clara.net>
 // Company: Claranet GmbH
 //
