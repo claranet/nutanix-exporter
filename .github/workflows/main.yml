@@ -25,5 +25,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Build Image
         uses: docker/build-push-action@v2.0.1
-        tags: claranet/nutanix-exporter:dev
+        with:
+          push: true
+          tags: claranet/nutanix-exporter:dev
           
