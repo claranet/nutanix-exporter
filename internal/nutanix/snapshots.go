@@ -1,3 +1,12 @@
+//
+// nutanix-exporter
+//
+// Prometheus Exportewr for Nutanix API
+//
+// Author: Martin Weber <martin.weber@de.clara.net>
+// Company: Claranet GmbH
+//
+
 package nutanix
 
 import (
