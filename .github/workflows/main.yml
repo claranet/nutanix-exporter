@@ -37,5 +37,5 @@ jobs:
           push: true
           tags: |
             claranet/nutanix-exporter:latest
-            claranet/nutanix-exporter:v0.5.0
+            claranet/nutanix-exporter:v0.5.1
           
