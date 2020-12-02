@@ -95,6 +95,12 @@ func main() {
 			return
 		}
 
+		target := params.Get("target")
+		if len(target) != 0 {
+			log.Infof("Using target parameter '%s'", target)
+			*nutanixURL = nutanix.ParseTarget(target)
+		}
+
 		log.Infof("Host: %s", *nutanixURL)
 
 		nutanixAPI := nutanix.NewNutanix(*nutanixURL, *nutanixUser, *nutanixPassword)
