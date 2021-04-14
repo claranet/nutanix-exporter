@@ -4,7 +4,7 @@ services:
     image: local/nutanix-exporter
     build: .
     command:
-      - "-log.level=DEBUG"
+      #- "-log.level=DEBUG"
       - "-nutanix.conf=/config.yml"
     ports:
       - 9405:9405

@@ -34,7 +34,7 @@ func (e *SnapshotsExporter) Describe(ch chan<- *prometheus.Desc) {
 	for _, key := range e.fields {
 		e.metrics[key] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: e.namespace,
-			Name:      key, Help: "..."}, []string{"snapshot_uuid", "snapshot_name", "vm_uuid"})
+			Name:      key, Help: "..."}, []string{"snapshot_uuid", "snapshot_name", "vm_uuid", "vm_name"})
 
 		e.metrics[key].Describe(ch)
 	}
@@ -58,14 +58,16 @@ func (e *SnapshotsExporter) Collect(ch chan<- prometheus.Metric) {
 	log.Debugf("Results: %s", len(entities))
 	for _, entity := range entities {
 		ent := entity.(map[string]interface{})
-		
+		vm_details := ent["vm_create_spec"].(map[string]interface{})
+
 		snapshot_name := ent["snapshot_name"].(string)
 		snapshot_uuid := ent["uuid"].(string)
 		vm_uuid := ent["vm_uuid"].(string)
+		vm_name := vm_details["name"].(string)
 
 		for _, key := range e.fields {
 			log.Debugf("%s > %s", key, ent[key])
-			g := e.metrics[key].WithLabelValues(snapshot_uuid, snapshot_name, vm_uuid)
+			g := e.metrics[key].WithLabelValues(snapshot_uuid, snapshot_name, vm_uuid, vm_name)
 			g.Set(e.valueToFloat64(ent[key]))
 			g.Collect(ch)
 		}
