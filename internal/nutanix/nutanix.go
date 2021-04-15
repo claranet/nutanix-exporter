@@ -79,3 +79,12 @@ func NewNutanix(url string, username string, password string) *Nutanix {
 		password: password,
 	}
 }
+
+// Parse optional target param; if it looks like a bare string, add scheme and
+// default port (9440)
+func ParseTarget(target string) string {
+	if !strings.HasPrefix(target, "http") {
+		return "https://" + target + ":9440"
+	}
+	return target
+}
