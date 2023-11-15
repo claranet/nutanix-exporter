@@ -11,7 +11,7 @@
 package main
 
 import (
-	"./internal/nutanix"
+	"github.com/claranet/nutanix-exporter/internal/nutanix"
 
 	"flag"
 	"net/http"

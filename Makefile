@@ -21,7 +21,7 @@ clean:
 
 docker:
 	@echo ">> Compile using docker container"
-	@docker build -t "$(DOCKER_IMAGE_NAME)" .
+	@docker buildx build -t "$(DOCKER_IMAGE_NAME)" .
 
 windows: prepare
 	$(eval export GOOS=windows)
